@@ -1,0 +1,45 @@
+version: '3.0'
+services:
+  activepieces:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.activepieces.rule=Host(`activepieces.test-multi-docker.jacopomarrone.com`)"
+      - "traefik.http.services.activepieces.loadbalancer.server.port=80"
+    image: activepieces/activepieces:0.10.1
+    container_name: activepieces
+    restart: unless-stopped
+    ## Enable the following line if you already use AP_EXECUTION_MODE with SANDBOXED or old activepieces, checking the breaking change documentation for more info.
+    ## privileged: true
+    depends_on:
+      - postgres
+      - redis
+    env_file: .env
+    networks:
+      - root_traefik_net
+  postgres:
+    image: 'postgres:14.4'
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      - 'POSTGRES_DB=${AP_POSTGRES_DATABASE}'
+      - 'POSTGRES_PASSWORD=${AP_POSTGRES_PASSWORD}'
+      - 'POSTGRES_USER=${AP_POSTGRES_USERNAME}'
+    volumes:
+      - 'postgres_data:/var/lib/postgresql/data'
+    networks:
+      - root_traefik_net
+  redis:
+    image: 'redis:7.0.7'
+    container_name: redis
+    restart: unless-stopped
+    volumes:
+      - 'redis_data:/data'
+    networks:
+      - root_traefik_net
+volumes:
+  postgres_data:
+  redis_data:
+networks:
+  activepieces:
+  root_traefik_net:
+    external: true
