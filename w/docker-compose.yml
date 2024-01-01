@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  w:
+    # A container that exposes an API to show its IP address
+    image: traefik/whoami
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.w.rule=Host(`w.jacopomarrone.com`)"
+    networks:
+      - root_traefik_net
+networks:
+  root_traefik_net:
+    external: true
